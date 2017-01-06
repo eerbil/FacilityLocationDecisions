@@ -5,11 +5,11 @@ import java.util.Scanner;
 public class Test {
 
 	public static void main(String[] args) {
-		Facility f = new Facility(9, 9);
+		Facility f = new Facility(15, 15);
 		Machine[] s = {
-				new Machine("1", 3, 1),
+				new Machine("1", 3, 5),
 				new Machine("2", 2, 1),
-				new Machine("3", 2, 1),
+				new Machine("3", 4, 4),
 				new Machine("4", 1, 1),
 		};
 		HashMap<PositionlessPair<Machine,Machine>, Closeness> hm = new HashMap<>();
