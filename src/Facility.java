@@ -124,62 +124,26 @@ public class Facility {
 		return score;
 	}
 
+	/**
+	 * 
+	 * @param m1
+	 * @param m2
+	 * @return Manhattan distance between two machines, returns 1 if they are adjacent.
+	 */
 	private int calculateMachineDistance(Machine m1, Machine m2) {
 		Machine[] machines = {m1, m2};
-		Point[][] rectangles = new Point[2][];
+		Point[] centers = new Point[2];
 		for (int i = 0; i < machines.length; i++) {
 			Machine current = machines[i];
 			Point base = current.getLocation();
-			rectangles[i] = new Point[]{
-					new Point(base),
-					new Point(base.x + current.getXLength(), base.y),
-					new Point(base.x + current.getXLength(), base.y + current.getYLength()),
-					new Point(base.x, base.y + current.getYLength())
-			};
+			centers[i] = new Point(base.x + current.getXLength()/2, base.y + current.getYLength()/2);
 		}
-		return calculateRectangleDistance(rectangles[0], rectangles[1]);
-	}
-
-	private int calculateRectangleDistance(Point[] a, Point[] b){
-		/*Point[][] mins = new Point[2][2];  // mins[0] should always be <= mins[1]! && mins[i] = {a[j],b[k]} for any i,j,k
-		int[] minVals = {Integer.MAX_VALUE, Integer.MAX_VALUE};
-		for (int i = 0; i < a.length; i++) {
-			Point curA = a[i];
-			for (int j = 0; j < b.length; j++) {
-				Point curB = b[j];
-				int dist = calculateDistance(curA, curB);
-				if(dist <= minVals[0]){
-					// Shift arrays to end
-					minVals[1] = minVals[0];
-					mins[1] = mins[0];
-					
-					// Add new min to beginning
-					minVals[0] = dist;
-					mins[0] = new Point[]{curA, curB};
-					
-				}else if(dist < minVals[1]){
-					minVals[1] = dist;
-					mins[1] = new Point[]{curA, curB};
-				}
-			}
-		}
-		for (int j = 0; j < mins.length; j++) {
-			if(mins[0][j].equals(mins[1][j])){ // If a corner is closest to two corners
-				Point uniqueCorner = mins[0][j];
-				int otherIndex = 1 - j; // Because mins.length should be 2
-				
-				if(mins[0][otherIndex].x == mins[1][otherIndex].x){
-					
-				}
-			}
-		}*/
-		
-		
-		return calculateDistance(a[0], b[0]); // TODO
-	}
-
-	private int calculateDistance(Point a, Point b){
-		return Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+		Point distVector = new Point(
+				Math.abs(centers[0].x - centers[1].x), 
+				Math.abs(centers[0].y - centers[1].y));
+		distVector.x = Math.max(distVector.x - (m1.getXLength() + m2.getXLength())/2 , 0);
+		distVector.y = Math.max(distVector.y - (m1.getYLength() + m2.getYLength())/2 , 0);
+		return Math.max(distVector.x + distVector.y, 1);
 	}
 
 	public int getTotalX(Machine m){
