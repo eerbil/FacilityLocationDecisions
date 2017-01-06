@@ -1,18 +1,28 @@
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.function.Supplier;
 
 
-public abstract class Machine implements Comparable<Machine>{
+public class Machine implements Comparable<Machine>{
 	private String name;
 	private int width;
 	private int height;
 	private boolean isRotated;
 	private Point location;
+	private int tcr = 0;
+	private Queue<PlacementCandidate> candidatePlacements = new PriorityQueue<PlacementCandidate>(Collections.reverseOrder());
 	
-	private Collection<PlacementCandidate> candidatePlacements = new ArrayList<>();
+	public Machine(String name, int width, int height) {
+		this.name = name;
+		this.width = width;
+		this.height = height;
+	}
 	
 	public void rotate(){
 		if(canRotate()){
@@ -52,7 +62,7 @@ public abstract class Machine implements Comparable<Machine>{
 
 	@Override
 	public int compareTo(Machine m) {
-		return Math.subtractExact(0,0);
+		return Integer.compare(getTcr(), m.getTcr());
 	}
 
 	public void setLocation(Point point) {
@@ -64,11 +74,25 @@ public abstract class Machine implements Comparable<Machine>{
 		return location;
 	}
 
-	protected Collection<PlacementCandidate> getCandidatePlacements() {
+	protected Queue<PlacementCandidate> getCandidatePlacements() {
 		return candidatePlacements;
 	}
 
 	protected boolean isRotated() {
 		return isRotated;
 	}
+
+	protected int getTcr() {
+		return tcr;
+	}
+
+	protected void setTcr(int tcr) {
+		this.tcr = tcr;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+	
 }

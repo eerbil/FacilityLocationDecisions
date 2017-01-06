@@ -1,7 +1,7 @@
 import java.awt.Point;
 
 
-public class PlacementCandidate {
+public class PlacementCandidate implements Comparable<PlacementCandidate>{
 
 	private double score;
 	private Point location;
@@ -13,7 +13,7 @@ public class PlacementCandidate {
 		this.isRotated = isRotated;
 	}
 	
-	protected double getPoint() {
+	protected double getScore() {
 		return score;
 	}
 	protected Point getLocation() {
@@ -21,6 +21,11 @@ public class PlacementCandidate {
 	}
 	protected boolean isRotated() {
 		return isRotated;
+	}
+
+	@Override
+	public int compareTo(PlacementCandidate o) {
+		return Double.compare(getScore(), o.getScore());
 	}
 	
 //	protected void setPoint(double point) {

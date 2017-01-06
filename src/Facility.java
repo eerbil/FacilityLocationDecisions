@@ -1,10 +1,19 @@
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,11 +23,37 @@ public class Facility {
 
 	Machine[][] ground;
 
-	int xLen;
-	int ylen;
+	Map<PositionlessPair<Machine, Machine>,Closeness> closenesses;
 
-	Deque<Machine> placeds;
-	Queue<Machine> remainings;
+	//	private int xLen;
+	//	private int ylen;
+
+	Deque<Machine> placeds = new LinkedList<>();
+	Queue<Machine> remainings = new PriorityQueue<>(Collections.reverseOrder());
+
+	public Facility(int xLen, int yLen) {
+		ground = new Machine[yLen][xLen];
+	}
+
+	public void configureMachines(Map<PositionlessPair<Machine, Machine>,Closeness> closenessesInput){
+		closenesses = new HashMap<>(closenessesInput);
+
+		Set<Machine> machineSet = new HashSet<>();
+		for (PositionlessPair<Machine, Machine> machines : closenesses.keySet()) {
+			machineSet.add(machines.getS());
+			machineSet.add(machines.getT());
+		}
+
+		for (Machine machine : machineSet) {
+			machine.setTcr(calculateTcrForMachine(machine));
+		}
+
+
+		for (Machine machine : machineSet) {
+			remainings.add(machine);
+		}
+
+	}
 
 	public void placeAll(){ // Priority according to TCR
 
@@ -41,23 +76,50 @@ public class Facility {
 		Machine currentMachine = remainings.poll(); // First Highest TCR
 		Point coordinate = getInitialPoint(currentMachine);
 
+		int testFailCount = 0;
 		while(!testPlaceable(coordinate, currentMachine)){
-			//TODO
-			throw new RuntimeException("Now what?");
+			switch (testFailCount++ % 3) {
+			case 1:
+				coordinate.x--;
+				break;
+			case 2:
+				coordinate.y--;
+				break;
+
+			default:
+				currentMachine.rotate();
+				break;
+			}
 		}
 		place(coordinate, currentMachine);
 
 
-		currentMachine = remainings.poll();
-		Collection<PlacementCandidate> currentCandidates = currentMachine.getCandidatePlacements();
-		for (int i = 0; i < ground.length; i++) {
-			for (int j = 0; j < ground[i].length; j++) {
-				if(testPlaceable(j, i, currentMachine)){
-					currentCandidates.add(new PlacementCandidate(
-							calculateScore(currentMachine),
-							new Point(j, i),
-							currentMachine.isRotated()));
+		while (!remainings.isEmpty()) {
+			currentMachine = remainings.poll();
+			Queue<PlacementCandidate> currentCandidates = currentMachine.getCandidatePlacements();
+			for (int i = 0; i < ground.length; i++) {
+				for (int j = 0; j < ground[i].length; j++) {
+					for (byte doTwice = 0; doTwice < 2; doTwice++) { // For rotating
+						if (testPlaceable(j, i, currentMachine)) {
+							Point targetCoor = new Point(j, i);
+							//The line below is for calculations. Remember to set it to null afterwards!
+							currentMachine.setLocation(targetCoor);
+							currentCandidates.add(new PlacementCandidate(
+									calculateScore(currentMachine),
+									targetCoor,
+									currentMachine.isRotated()));
+							currentMachine.setLocation(null);
+						}
+						currentMachine.rotate();
+					}
 				}
+			}
+			if (!currentCandidates.isEmpty()) {
+				PlacementCandidate firstCandidate = currentCandidates.poll();
+				if(currentMachine.isRotated() != firstCandidate.isRotated()){
+					currentMachine.rotate();
+				}
+				place(firstCandidate.getLocation(), currentMachine);
 			}
 		}
 
@@ -65,8 +127,43 @@ public class Facility {
 	}
 
 	private double calculateScore(Machine currentMachine) {
-		
-		return 0;
+
+		double score = 0;
+		for (Machine placed : placeds) {
+			double cr = calculateClosenessRating(currentMachine, placed);
+			double dist = calculateMachineDistance(currentMachine, placed);
+			score += cr / dist;
+		}
+		return score;
+	}
+
+	private int calculateMachineDistance(Machine m1, Machine m2) {
+		Machine[] machines = {m1, m2};
+		Point[][] rectangles = new Point[2][];
+		for (int i = 0; i < machines.length; i++) {
+			Machine current = machines[i];
+			Point base = current.getLocation();
+			rectangles[i] = new Point[]{
+					new Point(base),
+					new Point(base.x + current.getXLength(), base.y),
+					new Point(base.x + current.getXLength(), base.y + current.getYLength()),
+					new Point(base.x, base.y + current.getYLength())
+					};
+		}
+		return calculateRectangleDistance(rectangles[0], rectangles[1]);
+	}
+
+	private int calculateRectangleDistance(Point[] a, Point[] b){
+		//		for (int i = 0; i < a.length; i++) {
+		//			for (int j = 0; j < b.length; j++) {
+		//				
+		//			}
+		//		}
+		return calculateDistance(a[0], b[0]); // TODO
+	}
+
+	private int calculateDistance(Point a, Point b){
+		return Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
 	}
 
 	public int getTotalX(Machine m){
@@ -116,7 +213,7 @@ public class Facility {
 		int yBound = y + m.getYLength();
 		for (int i = y; i < yBound; i++) {
 			for (int j = x; j < xBound; j++) {
-				if(ground[i][j] != null){
+				if(i >= ground.length || j >= ground[i].length || ground[i][j] != null){
 					return false;
 				}
 			}
@@ -130,6 +227,7 @@ public class Facility {
 
 	public void remove(Machine m){
 
+		placeds.remove(m);
 		Point p = m.getLocation();
 		int x = p.x;
 		int y = p.y;
@@ -156,6 +254,34 @@ public class Facility {
 		int y = ground.length / 2;
 		int x = ground[y].length / 2;
 		return pointForCentering(x, y, m);
+	}
+
+	protected int calculateTcrForMachine(Machine m){
+		int total = 0;
+		for (PositionlessPair<Machine, Machine> machines : closenesses.keySet()) {
+			if(machines.contains(m)){
+				total = closenesses.get(machines).getValue();
+			}
+		}
+
+		return total;
+	}
+
+	public int calculateClosenessRating(Machine m1, Machine m2){
+		return closenesses.get(new PositionlessPair<>(m1, m2)).getValue();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		String nl = System.lineSeparator();
+		for (int i = 0; i < ground.length; i++) {
+			for (int j = 0; j < ground[i].length; j++) {
+				sb.append(ground[i][j]).append("\t");
+			}
+			sb.append(nl);
+		}
+		return sb.toString();
 	}
 
 	//	public static class AroundAMachineIterator implements Iterator<Point>{
