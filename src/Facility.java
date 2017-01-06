@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,18 +133,18 @@ public class Facility {
 	 */
 	private int calculateMachineDistance(Machine m1, Machine m2) {
 		Machine[] machines = {m1, m2};
-		Point[] centers = new Point[2];
+		Point2D.Double[] centers = new Point2D.Double[2];
 		for (int i = 0; i < machines.length; i++) {
 			Machine current = machines[i];
 			Point base = current.getLocation();
-			centers[i] = new Point(base.x + current.getXLength()/2, base.y + current.getYLength()/2);
+			centers[i] = new Point2D.Double(base.x + (current.getXLength()-1)/2, base.y + (current.getYLength()-1)/2);
 		}
-		Point distVector = new Point(
+		Point2D.Double distVector = new Point2D.Double(
 				Math.abs(centers[0].x - centers[1].x), 
 				Math.abs(centers[0].y - centers[1].y));
 		distVector.x = Math.max(distVector.x - (m1.getXLength() + m2.getXLength())/2 , 0);
 		distVector.y = Math.max(distVector.y - (m1.getYLength() + m2.getYLength())/2 , 0);
-		return Math.max(distVector.x + distVector.y, 1);
+		return (int) Math.max(distVector.x + distVector.y, 1);
 	}
 
 	public int getTotalX(Machine m){

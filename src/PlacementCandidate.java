@@ -27,16 +27,12 @@ public class PlacementCandidate implements Comparable<PlacementCandidate>{
 	public int compareTo(PlacementCandidate o) {
 		return Double.compare(getScore(), o.getScore());
 	}
-	
-//	protected void setPoint(double point) {
-//		this.point = point;
-//	}
-//	protected void setLocation(Point location) {
-//		this.location = location;
-//	}
-//	protected void setRotated(boolean isRotated) {
-//		this.isRotated = isRotated;
-//	}
+
+	@Override
+	public String toString() {
+		return "PlacementCandidate [score=" + score + ", location=" + location
+				+ ", isRotated=" + isRotated + "]";
+	}
 	
 	
 	
