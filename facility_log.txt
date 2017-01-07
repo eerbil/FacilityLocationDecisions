@@ -1,46 +1,81 @@
 ***** Placement Attempt: 1  *****
-Placing the First Machine: 2 with Highest TCR (100) Initial Coordinates: (2,4)
+Placing the First Machine: 3 with Highest TCR (1101) Initial Coordinates: (1,2)
 -	-	-	-	-	-	
 -	-	-	-	-	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
 -	-	-	-	-	-	
 -	-	-	-	-	-	
--	-	2	2	-	-	
+
+***************
+Placing Machine: 4 with Score: 1000.0
+-	-	-	-	-	-	
+-	4	-	-	-	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	-	-	-	-	-	
+-	-	-	-	-	-	
+
+***************
+Placing Machine: 2 with Score: 110.0
+-	-	2	-	-	-	
+-	4	2	-	-	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	3	3	3	3	-	
+-	-	-	-	-	-	
+-	-	-	-	-	-	
+
+***************
+***** Attempt failed. Starting Placement from scratch. *****
+***** Placement Attempt: 2  *****
+Placing the First Machine: 3 with Highest TCR (1101) Initial Coordinates: (0,0)
+3	3	3	3	-	-	
+3	3	3	3	-	-	
+3	3	3	3	-	-	
+3	3	3	3	-	-	
+-	-	-	-	-	-	
 -	-	-	-	-	-	
 -	-	-	-	-	-	
 -	-	-	-	-	-	
 
 ***************
-Placing Machine: 3 with Score: 100.0
+Placing Machine: 4 with Score: 1000.0
+3	3	3	3	4	-	
 3	3	3	3	-	-	
 3	3	3	3	-	-	
 3	3	3	3	-	-	
-3	3	3	3	-	-	
--	-	2	2	-	-	
 -	-	-	-	-	-	
--	-	-	-	-	-	
--	-	-	-	-	-	
-
-***************
-Placing Machine: 4 with Score: 1010.0
-3	3	3	3	-	-	
-3	3	3	3	-	-	
-3	3	3	3	-	-	
-3	3	3	3	-	-	
--	4	2	2	-	-	
 -	-	-	-	-	-	
 -	-	-	-	-	-	
 -	-	-	-	-	-	
 
 ***************
-Placing Machine: 1 with Score: 10.5
+Placing Machine: 2 with Score: 110.0
+3	3	3	3	4	-	
+3	3	3	3	2	-	
+3	3	3	3	2	-	
 3	3	3	3	-	-	
+-	-	-	-	-	-	
+-	-	-	-	-	-	
+-	-	-	-	-	-	
+-	-	-	-	-	-	
+
+***************
+Placing Machine: 1 with Score: 6.0
+3	3	3	3	4	-	
+3	3	3	3	2	-	
+3	3	3	3	2	-	
 3	3	3	3	-	-	
-3	3	3	3	-	-	
-3	3	3	3	-	-	
--	4	2	2	-	-	
 1	1	1	1	1	-	
 1	1	1	1	1	-	
 1	1	1	1	1	-	
+-	-	-	-	-	-	
 
 ***************
-***** All machines are successfully placed to 6x8 facility with Total Score: 1120.5 *****
+***** All machines are successfully placed to 6x8 facility with Total Score: 1116.0 *****

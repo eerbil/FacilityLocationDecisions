@@ -210,6 +210,10 @@ public class Facility {
 	}
 
 	private void rollBackPlacements(){
+		for (Machine machine : placeds) {
+			machine.setLocation(null);
+			machine.deleteAllCandidatePlacements();
+		}
 		placeds = new LinkedList<>();
 		remainings = new PriorityQueue<>(Collections.reverseOrder());
 		ground = new Machine[ground.length][ground[0].length];
@@ -254,7 +258,7 @@ public class Facility {
 		int total = 0;
 		for (PositionlessPair<Machine, Machine> machines : closenesses.keySet()) {
 			if(machines.contains(m)){
-				total = closenesses.get(machines).getValue();
+				total += closenesses.get(machines).getValue();
 			}
 		}
 

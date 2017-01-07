@@ -5,13 +5,18 @@ import java.util.Queue;
 
 
 public class Machine implements Comparable<Machine>{
+	
+	private static Queue<PlacementCandidate> newCandidatePlacements(){
+		return new PriorityQueue<PlacementCandidate>(Collections.reverseOrder());
+	}
+	
 	private String name;
 	private int width;
 	private int height;
 	private boolean isRotated;
 	private Point location;
 	private int tcr = 0;
-	private Queue<PlacementCandidate> candidatePlacements = new PriorityQueue<PlacementCandidate>(Collections.reverseOrder());
+	private Queue<PlacementCandidate> candidatePlacements = newCandidatePlacements();
 	
 	public Machine(String name, int width, int height) {
 		this.name = name;
@@ -55,6 +60,10 @@ public class Machine implements Comparable<Machine>{
 
 	protected Queue<PlacementCandidate> getCandidatePlacements() {
 		return candidatePlacements;
+	}
+	
+	protected void deleteAllCandidatePlacements(){
+		candidatePlacements = newCandidatePlacements();
 	}
 
 	protected boolean isRotated() {
