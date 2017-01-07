@@ -1,12 +1,7 @@
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.function.Supplier;
 
 
 public class Machine implements Comparable<Machine>{
@@ -43,22 +38,6 @@ public class Machine implements Comparable<Machine>{
 	public int getYLength(){
 		return isRotated ? width : height;
 	}
-	
-	public Machine getNeighbor(Direction dir){
-		Direction.values();
-		return null;
-	}
-	public void setNeighbor(Direction dir, Machine mach){
-		
-	}
-	
-	public List<Machine> getAllNeighbors(){
-		return null;
-	}
-	
-	/*public <T> T chain(Supplier<T> supp, Direction dir){
-		return 
-	}*/
 
 	@Override
 	public int compareTo(Machine m) {

@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.Scanner;
 
 
 public class Test {
@@ -22,8 +21,6 @@ public class Test {
 		f.configureMachines(hm);
 		f.placeAll();
 		System.out.println(f);
-		Scanner sc = new Scanner(System.in);
-		System.out.println(sc.nextLine());
 		
 	}
 

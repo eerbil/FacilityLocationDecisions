@@ -1,22 +1,13 @@
 import java.awt.Point;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 
@@ -26,11 +17,10 @@ public class Facility {
 
 	Map<PositionlessPair<Machine, Machine>,Closeness> closenesses;
 
-	//	private int xLen;
-	//	private int ylen;
-
 	Deque<Machine> placeds = new LinkedList<>();
 	Queue<Machine> remainings = new PriorityQueue<>(Collections.reverseOrder());
+
+	StringBuilder log = new StringBuilder();
 
 	public Facility(int xLen, int yLen) {
 		ground = new Machine[yLen][xLen];
@@ -56,11 +46,16 @@ public class Facility {
 
 	}
 
-	public void placeAll(){ // Priority according to TCR
+	public void placeAll(){
+		placeAll(0);
+	}
 
+	protected void placeAll(int count){ // Priority according to TCR
 
+		logWriteln("***** Placement Attempt: "+ (count + 1) +"  *****");
+		double totalScore = 0;
 		Machine currentMachine = remainings.poll(); // First Highest TCR
-		Point coordinate = getInitialPoint(currentMachine);
+		Point coordinate = calculateInitialPoint(currentMachine, count);
 
 		int testFailCount = 0;
 		while(!testPlaceable(coordinate, currentMachine)){
@@ -77,8 +72,12 @@ public class Facility {
 				break;
 			}
 		}
+		logWriteln("Placing the First Machine: " + currentMachine
+				+ " with Highest TCR (" + currentMachine.getTcr() + ")"
+				+ " Initial Coordinates: (" + coordinate.x +"," + coordinate.y + ")" );
 		place(coordinate, currentMachine);
-
+		logWriteln(toString());
+		logWriteln("***************");
 
 		while (!remainings.isEmpty()) {
 			currentMachine = remainings.poll();
@@ -105,12 +104,22 @@ public class Facility {
 				if(currentMachine.isRotated() != firstCandidate.isRotated()){
 					currentMachine.rotate();
 				}
+				logWriteln("Placing Machine: " + currentMachine
+						+ " with Score: " + firstCandidate.getScore());
+				
 				place(firstCandidate.getLocation(), currentMachine);
-			}else{
-				//TODO
+				
+				totalScore += firstCandidate.getScore();
+				logWriteln(toString());
+				logWriteln("***************");
+			}else{  // No place to put machine
+				placeAllFailed(count);
+				return;
 			}
 		}
-
+		logWriteln("***** All machines are successfully placed to " 
+				+ ground[0].length + "x" + ground.length 
+				+ " facility with Total Score: " + totalScore + " *****");
 
 	}
 
@@ -132,44 +141,19 @@ public class Facility {
 	 * @return Manhattan distance between two machines, returns 1 if they are adjacent.
 	 */
 	private int calculateMachineDistance(Machine m1, Machine m2) {
-		Machine[] machines = {m1, m2};
-		Point2D.Double[] centers = new Point2D.Double[2];
-		for (int i = 0; i < machines.length; i++) {
-			Machine current = machines[i];
-			Point base = current.getLocation();
-			centers[i] = new Point2D.Double(base.x + (current.getXLength()-1)/2, base.y + (current.getYLength()-1)/2);
-		}
-		Point2D.Double distVector = new Point2D.Double(
-				Math.abs(centers[0].x - centers[1].x), 
-				Math.abs(centers[0].y - centers[1].y));
-		distVector.x = Math.max(distVector.x - (m1.getXLength() + m2.getXLength())/2 , 0);
-		distVector.y = Math.max(distVector.y - (m1.getYLength() + m2.getYLength())/2 , 0);
-		return (int) Math.max(distVector.x + distVector.y, 1);
-	}
+		Point distVector = new Point(m1.getLocation().x - m2.getLocation().x, m1.getLocation().y - m2.getLocation().y);
+		int xLenOfLowerX = (distVector.x < 0 ? m1 : m2).getXLength();
+		int yLenOfLowerY = (distVector.y < 0 ? m1 : m2).getYLength();
 
-	public int getTotalX(Machine m){
-		int total = 0;
-		for(Direction dir : EnumSet.of(Direction.EAST, Direction.WEST)){
-			while(m != null){
-				total += m.getXLength();
-				m = m.getNeighbor(dir);
-			}
-		}
+		distVector.x = Math.abs(distVector.x) - xLenOfLowerX;
+		distVector.y = Math.abs(distVector.y) - yLenOfLowerY;
 
-		return total;
+		int cornerPenalty = (distVector.x == 0 && distVector.y == 0) ? 1 : 0;
 
-	}
+		distVector.x = Math.max(distVector.x, 0);
+		distVector.y = Math.max(distVector.y, 0);
 
-	public int getTotalY(Machine m){
-		int total = 0;
-		for(Direction dir : EnumSet.of(Direction.NORTH, Direction.SOUTH)){
-			while(m != null){
-				total += m.getYLength();
-				m = m.getNeighbor(dir);
-			}
-		}
-
-		return total;
+		return distVector.x + distVector.y + cornerPenalty + 1;	
 
 	}
 
@@ -225,16 +209,45 @@ public class Facility {
 
 	}
 
+	private void rollBackPlacements(){
+		placeds = new LinkedList<>();
+		remainings = new PriorityQueue<>(Collections.reverseOrder());
+		ground = new Machine[ground.length][ground[0].length];
+		configureMachines(closenesses);
+	}
+
+	private void placeAllFailed(int countBeforeFail){
+		switch (countBeforeFail) {
+		case 0:
+			logWriteln("***** Attempt failed. Starting Placement from scratch. *****");
+			rollBackPlacements();
+			placeAll(countBeforeFail + 1);
+			break;
+
+		default:
+			logWriteln("***** No suitable placement is found, terminating. *****");
+			break;
+		}
+
+
+	}
+
 	private Point pointForCentering(int x, int y, Machine m){
 		return new Point(
 				x - m.getXLength()/2,
 				y - m.getYLength()/2);
 	}
 
-	protected Point getInitialPoint(Machine m){
-		int y = ground.length / 2;
-		int x = ground[y].length / 2;
-		return pointForCentering(x, y, m);
+	protected Point calculateInitialPoint(Machine m, int strategy){
+
+		switch (strategy) {
+		case 0:
+			int y = ground.length / 2;
+			int x = ground[y].length / 2;
+			return pointForCentering(x, y, m);
+		default:
+			return new Point(0,0);
+		}
 	}
 
 	protected int calculateTcrForMachine(Machine m){
@@ -258,11 +271,24 @@ public class Facility {
 		String nl = System.lineSeparator();
 		for (int i = 0; i < ground.length; i++) {
 			for (int j = 0; j < ground[i].length; j++) {
-				sb.append(ground[i][j]).append("\t");
+				Machine current = ground[i][j];
+				sb.append(current == null ? "-" : current).append("\t");
 			}
 			sb.append(nl);
 		}
 		return sb.toString();
+	}
+
+	public String getLog(){
+		return log.toString();
+	}
+
+	private void logWrite(String str){
+		log.append(str);
+	}
+
+	private void logWriteln(String str){
+		logWrite(str + System.lineSeparator());
 	}
 
 	//	public static class AroundAMachineIterator implements Iterator<Point>{
